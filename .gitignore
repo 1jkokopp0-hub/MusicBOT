@@ -1,0 +1,11 @@
+.env
+.env.local
+.env.*.local
+node_modules/
+nodelink/node_modules/
+nodelink/dist/
+data/
+*.log
+nodelink/*.log
+lavalink/*.log
+*.jar
