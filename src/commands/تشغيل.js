@@ -38,10 +38,22 @@ module.exports = {
     }
 
     if (result.loadType === "playlist") {
+      if (player.queue.tracks.length + result.tracks.length > client.config.maxQueueLength) {
+        return message.channel.send({
+          embeds: [error(`القائمة وصلت الحد الاقصى (${client.config.maxQueueLength}).`)]
+        });
+      }
+
       player.queue.add(result.tracks);
       if (!player.playing) await player.play();
       return message.channel.send({
         embeds: [music("تمت اضافة قائمة", `تمت اضافة **${result.tracks.length}** اغنية.`)]
+      });
+    }
+
+    if (player.queue.tracks.length + (player.queue.current ? 1 : 0) >= client.config.maxQueueLength) {
+      return message.channel.send({
+        embeds: [error(`القائمة وصلت الحد الاقصى (${client.config.maxQueueLength}).`)]
       });
     }
 

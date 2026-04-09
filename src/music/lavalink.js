@@ -35,16 +35,28 @@ function createLavalink(client) {
     }
   });
 
-  client.on("raw", (d) => manager.sendRawData(d));
+  client.on("raw", (payload) => manager.sendRawData(payload));
 
   manager.nodeManager.on("connect", (node) => {
     client.lavalinkReady = true;
     console.log(`[LAVALINK] Connected: ${node.id}`);
+
+    if (client.state?.stayInVoice) {
+      setTimeout(() => {
+        require("./twentyFourSeven").ensureTwentyFourSevenConnection(client).catch((error) => {
+          console.error("[BOT] Failed to restore 24/7 after audio backend connected:", error);
+        });
+      }, 1500);
+    }
   });
 
   manager.nodeManager.on("disconnect", (node, reason) => {
     client.lavalinkReady = false;
     console.log(`[LAVALINK] Disconnected: ${node.id}`, reason || "no reason");
+  });
+
+  manager.nodeManager.on("error", (node, error) => {
+    console.error(`[LAVALINK] Node error on ${node.id}:`, error);
   });
 
   return manager;
