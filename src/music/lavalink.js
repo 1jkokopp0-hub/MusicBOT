@@ -1,6 +1,13 @@
 const { LavalinkManager } = require("lavalink-client");
 
+function isNodeReady(manager) {
+  const node = [...manager.nodeManager.nodes.values()][0];
+  return Boolean(node?.isAlive);
+}
+
 function createLavalink(client) {
+  client.lavalinkReady = false;
+
   const manager = new LavalinkManager({
     nodes: [
       {
@@ -31,14 +38,16 @@ function createLavalink(client) {
   client.on("raw", (d) => manager.sendRawData(d));
 
   manager.nodeManager.on("connect", (node) => {
+    client.lavalinkReady = true;
     console.log(`[LAVALINK] Connected: ${node.id}`);
   });
 
   manager.nodeManager.on("disconnect", (node, reason) => {
+    client.lavalinkReady = false;
     console.log(`[LAVALINK] Disconnected: ${node.id}`, reason || "no reason");
   });
 
   return manager;
 }
 
-module.exports = { createLavalink };
+module.exports = { createLavalink, isNodeReady };
