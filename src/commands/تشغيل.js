@@ -1,5 +1,5 @@
 const { error, music } = require("../utils/embeds");
-const { isNodeReady } = require("../music/lavalink");
+const { isNodeReady, waitForPlayerVoiceState } = require("../music/lavalink");
 
 module.exports = {
   name: "تشغيل",
@@ -31,6 +31,12 @@ module.exports = {
     });
 
     if (!player.connected) await player.connect();
+    const voiceReady = await waitForPlayerVoiceState(player);
+    if (!voiceReady) {
+      return message.channel.send({
+        embeds: [error("اتصال الروم الصوتي تأخر شوي. جرب الامر مرة ثانية بعد ثواني.")]
+      });
+    }
 
     const result = await player.search({ query, source: client.config.searchSource }, message.author);
     if (!result || !result.tracks.length) {

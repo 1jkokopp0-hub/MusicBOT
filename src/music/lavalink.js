@@ -5,6 +5,32 @@ function isNodeReady(manager) {
   return Boolean(node?.isAlive);
 }
 
+function hasPlayerVoiceState(player) {
+  return Boolean(player?.voice?.sessionId && player?.voice?.token && player?.voice?.endpoint);
+}
+
+function waitForPlayerVoiceState(player, timeoutMs = 10_000, intervalMs = 200) {
+  if (hasPlayerVoiceState(player)) return Promise.resolve(true);
+
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      cleanup();
+      resolve(false);
+    }, timeoutMs);
+
+    const interval = setInterval(() => {
+      if (!hasPlayerVoiceState(player)) return;
+      cleanup();
+      resolve(true);
+    }, intervalMs);
+
+    const cleanup = () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
+  });
+}
+
 function createLavalink(client) {
   client.lavalinkReady = false;
 
@@ -62,4 +88,4 @@ function createLavalink(client) {
   return manager;
 }
 
-module.exports = { createLavalink, isNodeReady };
+module.exports = { createLavalink, isNodeReady, waitForPlayerVoiceState };

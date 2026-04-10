@@ -1,4 +1,4 @@
-const { isNodeReady } = require("./lavalink");
+const { isNodeReady, waitForPlayerVoiceState } = require("./lavalink");
 
 async function getTargetGuildAndChannel(client) {
   const guild = await client.guilds.fetch(client.config.guildId).catch(() => null);
@@ -31,6 +31,7 @@ async function ensureTwentyFourSevenConnection(client) {
   });
 
   if (!player.connected) await player.connect();
+  await waitForPlayerVoiceState(player);
 
   return { ok: true, guild, channel, player };
 }
