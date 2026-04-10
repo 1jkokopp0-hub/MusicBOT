@@ -1,8 +1,10 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { ensureTwentyFourSevenConnection } = require("../music/twentyFourSeven");
+const { isNodeReady, createLavalink } = require("../music/lavalink");
+const { updatePresence } = require("../utils/presence");
 
 function waitForNode(manager, timeoutMs = 30_000) {
-  if (require("../music/lavalink").isNodeReady(manager)) return Promise.resolve(true);
+  if (isNodeReady(manager)) return Promise.resolve(true);
 
   return new Promise((resolve) => {
     const timeout = setTimeout(() => {
@@ -27,13 +29,16 @@ function waitForNode(manager, timeoutMs = 30_000) {
 module.exports = async (client) => {
   console.log(`[BOT] Logged in as ${client.user.tag}`);
 
-  client.lavalink = require("../music/lavalink").createLavalink(client);
+  client.lavalink = createLavalink(client);
   await client.lavalink.init({
     id: client.user.id,
     username: client.user.username
   });
 
   const guild = await client.guilds.fetch(client.config.guildId).catch(() => null);
+  const targetChannel = guild ? await guild.channels.fetch(client.config.autoJoinVoiceChannelId).catch(() => null) : null;
+  await updatePresence(client, targetChannel?.name);
+
   if (guild) {
     const commands = [
       new SlashCommandBuilder()
@@ -78,6 +83,7 @@ module.exports = async (client) => {
       return;
     }
 
+    await updatePresence(client, result.channel?.name);
     console.log("[BOT] Auto joined target voice channel.");
   } catch (error) {
     console.error("[BOT] Failed to auto-join on startup:", error);

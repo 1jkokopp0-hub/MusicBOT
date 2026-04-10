@@ -1,4 +1,5 @@
 const { disableTwentyFourSevenConnection, ensureTwentyFourSevenConnection } = require("../music/twentyFourSeven");
+const { updatePresence } = require("../utils/presence");
 const { saveState } = require("../utils/stateStore");
 
 module.exports = async (client, interaction) => {
@@ -19,6 +20,7 @@ module.exports = async (client, interaction) => {
 
   if (!enable) {
     await disableTwentyFourSevenConnection(client);
+    await updatePresence(client);
     return interaction.reply({
       content: "تم تعطيل وضع 24/7 وخروج البوت من الروم الصوتي.",
       ephemeral: true
@@ -27,6 +29,8 @@ module.exports = async (client, interaction) => {
 
   const result = await ensureTwentyFourSevenConnection(client);
   if (!result.ok) {
+    await updatePresence(client);
+
     const content = result.reason === "node_not_ready"
       ? "تم تفعيل 24/7، لكن خادم الصوت لم يجهز بعد. جرب بعد ثواني."
       : "تم تفعيل 24/7، لكن ما قدرت اوصل للروم الصوتي المحدد.";
@@ -37,6 +41,7 @@ module.exports = async (client, interaction) => {
     });
   }
 
+  await updatePresence(client, result.channel?.name);
   return interaction.reply({
     content: "تم تفعيل وضع 24/7 والبوت الآن داخل الروم الصوتي.",
     ephemeral: true

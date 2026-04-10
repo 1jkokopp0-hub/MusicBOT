@@ -1,4 +1,5 @@
 const { ensureTwentyFourSevenConnection } = require("../music/twentyFourSeven");
+const { updatePresence } = require("../utils/presence");
 
 module.exports = async (client, oldState, newState) => {
   if (!client.state?.stayInVoice) return;
@@ -14,4 +15,8 @@ module.exports = async (client, oldState, newState) => {
       console.error("[BOT] Failed to restore 24/7 voice connection:", error);
     });
   }, 3000);
+
+  setTimeout(() => {
+    updatePresence(client).catch(() => null);
+  }, 3500);
 };
