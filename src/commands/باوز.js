@@ -5,8 +5,15 @@ module.exports = {
   aliases: ["pause"],
   async run({ client, message }) {
     const player = client.lavalink.getPlayer(message.guild.id);
-    if (!player || !player.queue.current) return message.channel.send({ embeds: [error("ماكو شي يتوقف.")] });
+    if (!player || !player.queue.current) {
+      return message.channel.send({ embeds: [error("ماكو شيء يتوقف.")] });
+    }
+
+    if (player.paused) {
+      return message.channel.send({ embeds: [error("التشغيل متوقف مسبقا.")] });
+    }
+
     await player.pause();
-    return message.channel.send({ embeds: [ok("تم ايقاف التشغيل مؤقتاً.")] });
+    return message.channel.send({ embeds: [ok("تم ايقاف التشغيل مؤقتا.")] });
   }
 };

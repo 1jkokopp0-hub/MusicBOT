@@ -1,3 +1,4 @@
+const { MessageFlags } = require("discord.js");
 const { disableTwentyFourSevenConnection, ensureTwentyFourSevenConnection } = require("../music/twentyFourSeven");
 const { updatePresence } = require("../utils/presence");
 const { saveState } = require("../utils/stateStore");
@@ -8,7 +9,7 @@ module.exports = async (client, interaction) => {
   if (!client.config.ownerIds.includes(interaction.user.id)) {
     return interaction.reply({
       content: "هذا الامر للمالك فقط.",
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
   }
 
@@ -23,7 +24,7 @@ module.exports = async (client, interaction) => {
     await updatePresence(client);
     return interaction.reply({
       content: "تم تعطيل وضع 24/7 وخروج البوت من الروم الصوتي.",
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
   }
 
@@ -37,13 +38,13 @@ module.exports = async (client, interaction) => {
 
     return interaction.reply({
       content,
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
   }
 
   await updatePresence(client, result.channel?.name);
   return interaction.reply({
     content: "تم تفعيل وضع 24/7 والبوت الآن داخل الروم الصوتي.",
-    ephemeral: true
+    flags: MessageFlags.Ephemeral
   });
 };
