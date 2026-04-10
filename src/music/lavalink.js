@@ -1,4 +1,32 @@
-const { LavalinkManager } = require("lavalink-client");
+const { LavalinkManager, LavalinkNode, NodeLinkNode } = require("lavalink-client");
+
+function patchPayloadTrackResolver(NodeClass) {
+  if (!NodeClass?.prototype || NodeClass.prototype.__musicBotSafeTrackPayloadPatch) return;
+
+  const original = NodeClass.prototype.getTrackOfPayload;
+  if (typeof original !== "function") return;
+
+  NodeClass.prototype.getTrackOfPayload = function patchedGetTrackOfPayload(payload) {
+    try {
+      return original.call(this, payload);
+    } catch (error) {
+      const missingEncoded = error instanceof RangeError && String(error.message).includes("data.encoded");
+      if (!missingEncoded) throw error;
+
+      this._emitDebugEvent?.("TrackPayloadMissingEncoded", {
+        state: "warn",
+        message: `Received malformed track payload for event "${payload?.type || "unknown"}"; falling back to null track.`,
+        functionLayer: "MusicBOT > patchPayloadTrackResolver()"
+      });
+      return null;
+    }
+  };
+
+  NodeClass.prototype.__musicBotSafeTrackPayloadPatch = true;
+}
+
+patchPayloadTrackResolver(LavalinkNode);
+patchPayloadTrackResolver(NodeLinkNode);
 
 function isNodeReady(manager) {
   const node = [...manager.nodeManager.nodes.values()][0];
