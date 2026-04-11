@@ -12,6 +12,7 @@ module.exports = {
         `\`${prefix}تخطي\``,
         `\`${prefix}ايقاف\``,
         `\`${prefix}قائمة\``,
+        `\`${prefix}قائمة 2\``,
         `\`${prefix}الان\``,
         `\`${prefix}باوز\``,
         `\`${prefix}كمل\``,
@@ -20,6 +21,9 @@ module.exports = {
         `\`${prefix}حذف 3\``,
         `\`${prefix}مسح\``,
         `\`${prefix}تكرار track\``,
+        `\`${prefix}اذهب 1:30\``,
+        `\`${prefix}تقديم 15\``,
+        `\`${prefix}ترجيع 10\``,
         "`/247 mode:on` او `/247 mode:off`"
       ].join("\n"))]
     });

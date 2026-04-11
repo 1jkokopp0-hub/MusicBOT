@@ -1,5 +1,6 @@
+const { EmbedBuilder } = require("discord.js");
+const config = require("../config");
 const { msToTime } = require("../utils/time");
-const { info } = require("../utils/embeds");
 
 const repeatLabels = {
   off: "مغلق",
@@ -7,11 +8,15 @@ const repeatLabels = {
   queue: "قائمة"
 };
 
-function queueEmbed(player) {
+function queueEmbed(player, page = 1, pageSize = 10) {
   const current = player.queue.current;
-  const upcoming = player.queue.tracks.slice(0, 10);
-  const lines = [];
+  const totalTracks = player.queue.tracks.length;
+  const totalPages = Math.max(1, Math.ceil(totalTracks / pageSize));
+  const currentPage = Math.max(1, Math.min(page, totalPages));
+  const start = (currentPage - 1) * pageSize;
+  const upcoming = player.queue.tracks.slice(start, start + pageSize);
 
+  const lines = [];
   if (current) {
     lines.push(`**الآن:** **${current.info.title}** — \`${msToTime(current.info.duration)}\``);
   }
@@ -21,15 +26,26 @@ function queueEmbed(player) {
   } else {
     lines.push("\n**القائمة القادمة:**");
     upcoming.forEach((track, index) => {
-      lines.push(`${index + 1}. ${track.info.title} — \`${msToTime(track.info.duration)}\``);
+      lines.push(`${start + index + 1}. ${track.info.title} — \`${msToTime(track.info.duration)}\``);
     });
   }
 
-  lines.push(`\n**عدد القادم:** ${player.queue.tracks.length}`);
+  lines.push(`\n**عدد القادم:** ${totalTracks}`);
   lines.push(`**الصوت:** ${player.volume}%`);
   lines.push(`**التكرار:** ${repeatLabels[player.repeatMode || "off"] || "مغلق"}`);
 
-  return info("قائمة التشغيل", lines.join("\n"));
+  const embed = new EmbedBuilder()
+    .setColor(config.embedColor)
+    .setTitle("قائمة التشغيل")
+    .setDescription(lines.join("\n"))
+    .setFooter({ text: `الصفحة ${currentPage}/${totalPages}` })
+    .setTimestamp();
+
+  if (current?.info?.artworkUrl) {
+    embed.setThumbnail(current.info.artworkUrl);
+  }
+
+  return embed;
 }
 
 module.exports = { queueEmbed };

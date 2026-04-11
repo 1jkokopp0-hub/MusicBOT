@@ -24,4 +24,26 @@ function progressBar(position, duration, size = 12) {
   return Array.from({ length: size }, (_, index) => index === markerIndex ? "●" : "─").join("");
 }
 
-module.exports = { msToTime, progressBar };
+function parseTimeInput(input) {
+  if (!input) return null;
+  const value = String(input).trim();
+
+  if (/^\d+$/.test(value)) {
+    return Number(value) * 1000;
+  }
+
+  if (/^\d+:\d{1,2}(:\d{1,2})?$/.test(value)) {
+    const parts = value.split(":").map((part) => Number(part));
+    if (parts.some((part) => Number.isNaN(part))) return null;
+
+    let seconds = 0;
+    for (const part of parts) {
+      seconds = seconds * 60 + part;
+    }
+    return seconds * 1000;
+  }
+
+  return null;
+}
+
+module.exports = { msToTime, progressBar, parseTimeInput };
